@@ -1,23 +1,34 @@
-import logo from './logo.svg';
 import './App.css';
+import { ADD_TASK, DELETE_TASK } from './store/action';
+import { useDispatch, useSelector, useStore } from 'react-redux';
+import { getPosts } from './store/selector';
+import { useEffect } from 'react';
+import { loadTask } from './store/postsReducer';
+
+
 
 function App() {
+  const posts = useSelector(getPosts)
+  const dispatch = useDispatch()
+
+  useEffect(() => {
+    dispatch(loadTask())
+  }, [])
+
+  const addPosts = () => {
+    dispatch(ADD_TASK())
+  }
+  const deleteTask = (id) => {
+    dispatch(DELETE_TASK(id))
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {posts.map((item) => (
+        <div key={item.id} >{item.title} <button onClick={() => deleteTask(item.id)} >Delete Post </button> </div>
+      ))}
+
+      <button onClick={addPosts} >Add Posts</button>
     </div>
   );
 }
