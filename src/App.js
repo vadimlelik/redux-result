@@ -4,8 +4,6 @@ import { getPosts, isGetLoading } from './store/selector';
 import { useEffect, useState } from 'react';
 import { postAdd, postDelete, taskLoad } from './store/postsReducer';
 
-
-
 function App() {
   const [value, setValue] = useState('')
   const posts = useSelector(getPosts)
@@ -27,9 +25,6 @@ function App() {
   if (isLoading) {
     return <h1>Loading</h1>
   }
-  // if ('error') {
-  //   return <h1>Error</h1>
-  // }
 
   return (
     <div className="App">
