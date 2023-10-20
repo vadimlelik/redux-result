@@ -1,55 +1,75 @@
 import axios from 'axios'
-import { LOAD_TASK } from './action';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 const initialState = {
-    posts: [
-        { title: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. ', id: 1 },
-        { title: 'Lorem ipsum dolor sit amet consectetur, ?', id: 2 },
-        { title: 'Lorem ipsum dolor sit ?', id: 3 },
-        { title: 'Lorem ipsum dolor ?', id: 4 }
-    ],
+    entities: [],
     loading: false,
-    user: null,
-    role: 'admin'
+    error: null,
 }
 
-const postReducer = (state = initialState, { type, payload }) => {
 
-    switch (type) {
-        case 'ADD_TASK':
-            return {
-                ...state,
-                posts: state.posts.concat({ title: payload, id: Math.random() })
+export const taskLoad = createAsyncThunk('post/fetchPost', async (arg, { rejectWithValue }) => {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts')
+    const data = await response.json()
+    return data
 
-            };
-        case 'DELETE_TASK':
-            return {
-                ...state,
-                posts: state.posts.filter((post) => post.id !== payload)
-            }
-        case 'LOAD_TASK':
-            return {
-                ...state,
-                posts: state.posts.concat(payload)
-            }
-        default:
-            return state
+})
+
+
+const postSlice = createSlice({
+    name: 'post',
+    reducers: {
+        postAdd: (state, action) => {
+            state.entities.push(action.payload)
+        },
+        postDelete: (state, acton) => {
+            state.entities = state.entities.filter((post) => post.id !== acton.payload)
+        },
+        postReceived: (state, action) => {
+            state.loading = true
+        },
+        postRequested: (state, action) => {
+            state.loading = false
+            state.entities = state.entities.concat(action.payload)
+        },
+        postFailed: (state, action) => {
+            state.loading = false
+            state.error = action.payload
+
+        }
+    },
+    initialState,
+    extraReducers: (builder) => {
+        builder.addCase(taskLoad.pending, (state, action) => {
+            state.loading = true
+        })
+        builder.addCase(taskLoad.fulfilled, (state, action) => {
+            state.loading = false
+            state.entities = state.entities.concat(action.payload)
+        })
+        builder.addCase(taskLoad.rejected, (state, action) => {
+            state.loading = false
+        })
     }
 
-}
+})
 
 
-export const loadTask = () => async ({ dispatch }) => {
-    try {
-        const { data } = await axios('https://jsonplaceholder.typicode.com/posts')
-        dispatch(LOAD_TASK(data))
+const { actions, reducer: postReducer } = postSlice
+export const { postAdd, postDelete, postReceived, postRequested, postFailed } = actions
 
-    } catch (error) {
+// export const loadTask = () => async (dispatch, getState) => {
+//     dispatch(postReceived())
+//     try {
+//         const { data } = await axios('https://jsonplaceholder.typicode.com/posts')
+//         dispatch(postRequested(data))
 
-    }
+//     } catch (error) {
+//         dispatch(postFailed(error.message))
 
-}
+//     }
 
+// }
 
 
 export default postReducer

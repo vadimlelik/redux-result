@@ -1,15 +1,17 @@
-import { applyMiddleware, combineReducers, legacy_createStore } from "redux";
 
 import postReducer from "./postsReducer";
-import thunk from "./middleware/thunk";
+import { configureStore } from "@reduxjs/toolkit";
 
-const rootReducer = combineReducers({
-    post: postReducer
-
-})
-
-
-export const store = legacy_createStore(rootReducer, applyMiddleware(thunk))
+export default function createStore() {
+    const store = configureStore({
+        reducer: {
+            post: postReducer
+        },
+        devTools: true,
+        middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat()
+    })
+    return store
+}
 
 
 

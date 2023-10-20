@@ -1,34 +1,47 @@
 import './App.css';
-import { ADD_TASK, DELETE_TASK } from './store/action';
-import { useDispatch, useSelector, useStore } from 'react-redux';
-import { getPosts } from './store/selector';
-import { useEffect } from 'react';
-import { loadTask } from './store/postsReducer';
+import { useDispatch, useSelector } from 'react-redux';
+import { getPosts, isGetLoading } from './store/selector';
+import { useEffect, useState } from 'react';
+import { postAdd, postDelete, taskLoad } from './store/postsReducer';
 
 
 
 function App() {
+  const [value, setValue] = useState('')
   const posts = useSelector(getPosts)
+  const isLoading = useSelector(isGetLoading)
   const dispatch = useDispatch()
 
   useEffect(() => {
-    dispatch(loadTask())
+    dispatch(taskLoad())
   }, [])
 
   const addPosts = () => {
-    dispatch(ADD_TASK())
+    dispatch(postAdd({ title: value, id: Date.now() },))
+    setValue('')
   }
   const deleteTask = (id) => {
-    dispatch(DELETE_TASK(id))
+    dispatch(postDelete(id))
   }
+
+  if (isLoading) {
+    return <h1>Loading</h1>
+  }
+  // if ('error') {
+  //   return <h1>Error</h1>
+  // }
 
   return (
     <div className="App">
+      <div>
+        <input value={value} onChange={(e) => setValue(e.target.value)} />
+        <button onClick={addPosts} >Add Posts</button>
+      </div>
+
       {posts.map((item) => (
         <div key={item.id} >{item.title} <button onClick={() => deleteTask(item.id)} >Delete Post </button> </div>
       ))}
 
-      <button onClick={addPosts} >Add Posts</button>
     </div>
   );
 }
